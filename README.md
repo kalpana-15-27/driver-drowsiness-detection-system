@@ -4,55 +4,47 @@ A real-time safety application built for the Microsoft Elevate Internship using 
 Microsoft Elevate AICTE Internship Project | Jan 20 - Feb 15, 2026
 
 ## Project Overview
-This project is a real-time safety application designed to combat driver fatigue and prevent road accidents. Developed during a intensive 4-week internship, the system utilizes Computer Vision and Facial Landmark Detection to monitor driver alertness and provide an immediate audio-visual intervention when signs of drowsiness are detected.
+This project is a real-time safety application designed to combat driver fatigue and prevent road accidents. Developed during a intensive 4-week internship, the system utilizes Computer Vision and Haar Cascade Classifiers to monitor driver alertness. It provides immediate audio-visual intervention when signs of drowsiness (microsleep) are detected.
 
 ## Key Features
-Real-Time Monitoring: Captures live video at a stable 30 FPS to track facial expressions.
+#### Real-Time Monitoring:
+Captures live video at a stable 30 FPS to track facial state.
 
-Dlib 68-Point Landmarks: Utilizes high-precision facial landmark detection to map specific ocular coordinates.
+#### Lightweight Architecture:
+Optimized for modern environments (Python 3.13.5) using built-in OpenCV cascades, requiring no heavy external model files.
 
-Intelligent Alert System: Triggers an automated alarm after 0.5 seconds (15 frames) of detected microsleep.
+#### Intelligent State Management: 
+Triggers an automated alarm after 0.5 seconds (15 frames) of detected microsleep.
 
-Audio-Visual Intervention: Immediate feedback provided via on-screen alerts and a low-latency audio alarm managed through Pygame.
-
-## Required Assets
-[!IMPORTANT]
-Due to GitHub's 100MB file size limit, the required pre-trained model file must be downloaded externally.
-
-#### File Name: shape_predictor_68_face_landmarks.dat
-
-## Download Link:  [https://drive.google.com/file/d/1Cut_L9OOw3HJkxaj20xfKYt9hILa5xC9/view?usp=sharing]
-
-#### Instructions: Download the file and place it in the root directory of this project before execution.
+#### Active-Stop Intervention: Features logic that immediately kills the alarm sound once the driver's eyes are detected open, ensuring minimal distraction after recovery.
 
 ## Technical Stack
-### Language: 
-Python 3.14
+### Language: Python 3.13.5
 
-### Libraries: 
-OpenCV (cv2), Dlib, Pygame, Scipy
+Core Libraries: * OpenCV (cv2): For image processing and object detection.
 
-### Framework: 
-HOG + Linear SVM for facial detection
+Pygame: For low-latency audio management and alarm state control.
 
-## Installation & Setup
-### Clone the Repository:
+Model: Haar Cascade Classifiers (frontalface_default and haarcascade_eye).
 
+Installation & Setup
+1. Clone the Repository:
+2. Install Dependencies:
+3. Run the Application:
+Ensure your alarm.wav file is in the root directory, then run:
 
-git clone : [https://github.com/kalpana-15-27/driver-drowsiness-detection-system.git]
-### Install Dependencies:
+Why Haar Cascades?
+For this deployment, the project utilizes Haar Cascades instead of Dlib to ensure:
 
+Speed: Faster inference on standard laptop hardware and edge devices.
 
-pip install opencv-python dlib pygame scipy
-### Run the Application:
+Compatibility: Seamless integration with the latest Python versions without requiring heavy C++ build tools.
 
+Efficiency: Eliminates the need for 100MB+ external .dat files, making the repository standalone and portable.
 
-python drowsiness_detect.py
-## Future Scope
+Future Scope
 Azure IoT Integration: Scaling the system for fleet management using Microsoft Azure for real-time safety analytics.
 
-Edge Optimization: Using ONNX to deploy the model on mobile devices and dashcam hardware.
+Head Pose Estimation: Implementing 3D pose detection to differentiate between looking away (distraction) and closing eyes (drowsiness).
 
-## License
-This project is licensed under the MIT License.
-
+License
