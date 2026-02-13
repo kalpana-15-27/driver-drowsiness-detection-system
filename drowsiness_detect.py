@@ -1,65 +1,57 @@
 import cv2
 import pygame
 
-# --- INITIALIZATION ---
+# Initialize Pygame for the alarm sound
 pygame.mixer.init()
-try:
-    sound = pygame.mixer.Sound("alarm.wav")
-except:
-    print("[WARNING] 'alarm.wav' not found.")
-    sound = None
+alarm_sound = pygame.mixer.Sound("alarm.wav")
 
-# Load Standard Detectors (These are built-in to OpenCV, no downloads needed)
-# We use the default Haar Cascades for face and eyes
+# Load OpenCV's built-in Haar Cascade classifiers
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
 
 cap = cv2.VideoCapture(0)
-score = 0  # Counts how many frames your eyes are closed
-
-print("[INFO] Starting Camera (OpenCV Method)...")
+score = 0  # To track consecutive frames of closed eyes
 
 while True:
     ret, frame = cap.read()
-    if not ret: break
-    
-    # Pre-processing
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-    
+    height, width = frame.shape[:2]
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # Convert to grayscale for speed
+
+    # Detect faces in the frame
+    faces = face_cascade.detectMultiScale(gray, minNeighbors=5, scaleFactor=1.1, minSize=(25, 25))
+
+    # Default state: eyes are "closed" unless detected
+    eyes_detected = False
+
     for (x, y, w, h) in faces:
-        # Draw box around face
         cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
-        
-        # Focus only on the face area to find eyes
         roi_gray = gray[y:y+h, x:x+w]
-        roi_color = frame[y:y+h, x:x+w]
         
-        # Detect Eyes
-        eyes = eye_cascade.detectMultiScale(roi_gray, 1.1, 4)
+        # Detect eyes within the face region
+        eyes = eye_cascade.detectMultiScale(roi_gray)
+        for (ex, ey, ew, eh) in eyes:
+            eyes_detected = True
+            cv2.rectangle(frame[y:y+h, x:x+w], (ex, ey), (ex+ew, ey+eh), (0, 255, 0), 2)
+
+    if not eyes_detected:
+        score += 1 # Increment score if eyes are not found
+        cv2.putText(frame, "Eyes Closed", (10, height-20), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
         
-        # LOGIC: If Face is detected BUT 0 eyes are detected -> Eyes are Closed
-        if len(eyes) == 0:
-            score += 1
-            cv2.putText(frame, "Eyes Closed", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        else:
-            score = 0
-            cv2.putText(frame, "Eyes Open", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-            # Draw boxes around eyes
-            for (ex, ey, ew, eh) in eyes:
-                cv2.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 255, 0), 2)
-        
-        # ALARM TRIGGER (If eyes closed for > 15 frames)
+        # Trigger alarm if score exceeds 15 frames (0.5 seconds)
         if score > 15:
-            cv2.putText(frame, "****************ALERT!****************", (10, 400),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
-            if sound: 
-                sound.play()
-            
-    cv2.imshow('Drowsiness System', frame)
-    
+            try:
+                alarm_sound.play()
+            except:
+                pass
+            cv2.putText(frame, "DROWSINESS ALERT!", (width//4, height//2), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 3)
+    else:
+        score = 0 # Reset score if eyes are detected
+        alarm_sound.stop()
+        cv2.putText(frame, "Eyes Open", (10, height-20), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+
+    cv2.imshow('Driver Drowsiness Monitor', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-        
+
 cap.release()
 cv2.destroyAllWindows()
