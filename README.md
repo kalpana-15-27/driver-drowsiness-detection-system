@@ -39,7 +39,7 @@ HOG + Linear SVM for facial detection
 ### Clone the Repository:
 
 
-git clone https://github.com/[YOUR_USERNAME]/[YOUR_REPO_NAME].git
+git clone : [https://github.com/kalpana-15-27/driver-drowsiness-detection-system.git]
 ### Install Dependencies:
 
 
@@ -56,5 +56,3 @@ Edge Optimization: Using ONNX to deploy the model on mobile devices and dashcam 
 ## License
 This project is licensed under the MIT License.
 
-
-[https://drive.google.com/file/d/1Cut_L9OOw3HJkxaj20xfKYt9hILa5xC9/view?usp=sharing]
